@@ -1,0 +1,106 @@
+#define POT_PIN A0
+#define SWITCH_PIN_1 2
+#define SWITCH_PIN_2 3
+
+int step = 0;
+int stepMin = 0;
+int stepHour = 0;
+int minTemp = 1000;
+int maxTemp = 0;
+int totalTemp = 0;
+int temp1 = 0;
+int temp2 = 0;
+int averTemp10 = 0;
+int totalTemp10 = 0;
+
+void setup()
+
+{
+
+  pinMode(SWITCH_PIN_1,INPUT);
+  pinMode(SWITCH_PIN_2,INPUT);
+  Serial.begin(9600);
+    
+}
+
+void loop()
+
+{
+
+  step ++;
+
+  if (!(step % 60)) {
+      stepMin ++;
+      step = 0; 
+      Serial.println("\t");
+  }
+
+  if (!(stepMin % 60) && (stepMin > 0)) {
+      stepHour ++;
+      stepMin = 0;
+  }
+  
+  int value = analogRead(POT_PIN) / 4;
+  int temp = 0.72 * value - 21;
+
+  if (minTemp > temp) {
+      minTemp = temp;
+  }
+
+  if (maxTemp < temp) {
+    maxTemp = temp;
+  }
+
+  
+  totalTemp = temp1 + temp;
+  temp1 = totalTemp;
+  
+  totalTemp10 = temp2 + temp;
+  temp2 = totalTemp10;
+
+  int averTempFall = totalTemp / (step + stepMin * 60);
+
+  Serial.print(stepHour, DEC);
+  Serial.print(":");
+  Serial.print(stepMin, DEC);
+  Serial.print(":");
+  Serial.print(step, DEC);
+  Serial.print(" : ");
+  Serial.print(temp);
+  Serial.print("C | ");
+  
+  if (!(step % 10)) {
+
+  averTemp10 = totalTemp10 / 10;
+  temp2 = 0;
+
+  Serial.println("\t"); 
+  Serial.print("MAX : ");
+  Serial.print(maxTemp);
+  Serial.print("C | ");
+
+  Serial.print("MIN : ");
+  Serial.print(minTemp);
+  Serial.print("C | ");
+
+  Serial.print("AVERAGE 10 SEC : ");
+  Serial.print(averTemp10);
+  Serial.print("C | ");
+
+  Serial.print("AVERAGE FOR ALL TIME : ");
+  Serial.print(averTempFall);
+  Serial.print("C | ");
+  Serial.println("\t");
+  }
+
+  if (!(step % 60)) {
+    Serial.println("\t");
+  }
+  
+  if (digitalRead(SWITCH_PIN_1)) {
+    Serial.print("PAUSE ");
+    delay(10000);
+  }
+  
+  delay(1000);
+}
